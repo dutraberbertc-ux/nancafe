@@ -3,18 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nan Café - Painel Completo</title>
+<title>Nan Café - Painel Responsivo</title>
 <style>
-body { font-family: Arial, sans-serif; margin: 0; background: #e0f2e9; display: flex; }
-.sidebar { width: 200px; background: #2e7d32; color: white; height: 100vh; padding-top: 20px; position: fixed; }
+body { font-family: Arial, sans-serif; margin: 0; background: #e0f2e9; display: flex; flex-direction: row; }
+.sidebar { width: 200px; background: #2e7d32; color: white; height: 100vh; padding-top: 20px; position: fixed; transition: all 0.3s ease; }
 .sidebar a { display: block; color: white; padding: 15px; text-decoration: none; cursor: pointer; }
 .sidebar a:hover { background: #1b5e20; }
-main { margin-left: 200px; padding: 20px; width: 100%; }
+main { margin-left: 200px; padding: 20px; width: calc(100% - 200px); transition: all 0.3s ease; }
 .hidden { display: none; }
-input, select, button { padding: 5px; margin: 5px 0; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+input, select, button { padding: 5px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; display: block; overflow-x: auto; }
 table, th, td { border: 1px solid #333; }
-th, td { padding: 5px; text-align: left; }
+th, td { padding: 5px; text-align: left; white-space: nowrap; }
+
+/* Responsividade para celular */
+@media screen and (max-width: 768px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: relative; }
+  main { margin-left: 0; width: 100%; }
+  table { display: block; overflow-x: auto; }
+}
 </style>
 </head>
 <body>
@@ -124,6 +132,7 @@ th, td { padding: 5px; text-align: left; }
 </main>
 
 <script>
+// Mesma lógica JS que já gerenciamos antes
 let currentUser=''; let sales=[]; let users=['Renan','Ana Paula','Caio','Administrador'];
 let clients=[]; let products=[];
 
@@ -146,10 +155,7 @@ function addUser(){
   const pass=document.getElementById('newUserPass').value;
   if(name && pass){ users.push(name); updateUserList(); alert('Usuário cadastrado!'); }
 }
-function updateUserList(){
-  const ul=document.getElementById('userList'); ul.innerHTML='';
-  users.forEach(u=>{ const li=document.createElement('li'); li.textContent=u; ul.appendChild(li); });
-}
+function updateUserList(){ const ul=document.getElementById('userList'); ul.innerHTML=''; users.forEach(u=>{ const li=document.createElement('li'); li.textContent=u; ul.appendChild(li); }); }
 
 function addClient(){
   const name=document.getElementById('newClientName').value;
@@ -157,14 +163,8 @@ function addClient(){
   const creditLimit=parseFloat(document.getElementById('newClientCredit').value)||0;
   if(name){ clients.push({name,contact,creditLimit}); updateClientList(); updateSaleClients(); alert('Cliente cadastrado com limite de crédito!'); }
 }
-function updateClientList(){
-  const ul=document.getElementById('clientList'); ul.innerHTML='';
-  clients.forEach(c=>{ const li=document.createElement('li'); li.textContent=`${c.name} (${c.contact}) - Limite: ${c.creditLimit}`; ul.appendChild(li); });
-}
-function updateSaleClients(){
-  const select=document.getElementById('saleClient'); select.innerHTML='';
-  clients.forEach(c=>{ const opt=document.createElement('option'); opt.value=c.name; opt.textContent=c.name; select.appendChild(opt); });
-}
+function updateClientList(){ const ul=document.getElementById('clientList'); ul.innerHTML=''; clients.forEach(c=>{ const li=document.createElement('li'); li.textContent=`${c.name} (${c.contact}) - Limite: ${c.creditLimit}`; ul.appendChild(li); }); }
+function updateSaleClients(){ const select=document.getElementById('saleClient'); select.innerHTML=''; clients.forEach(c=>{ const opt=document.createElement('option'); opt.value=c.name; opt.textContent=c.name; select.appendChild(opt); }); }
 
 function addProduct(){
   const name=document.getElementById('newProductName').value;
@@ -172,18 +172,11 @@ function addProduct(){
   const price=document.getElementById('newProductPrice').value;
   if(name && price){ products.push({name,desc,price}); updateProductList(); updateSaleProducts(); alert('Produto cadastrado!'); }
 }
-function updateProductList(){
-  const ul=document.getElementById('productList'); ul.innerHTML='';
-  products.forEach(p=>{ const li=document.createElement('li'); li.textContent=`${p.name} - ${p.desc} - R$${p.price}`; ul.appendChild(li); });
-}
-function updateSaleProducts(){
-  const select=document.getElementById('saleProduct'); select.innerHTML='';
-  products.forEach(p=>{ const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; select.appendChild(opt); });
-}
+function updateProductList(){ const ul=document.getElementById('productList'); ul.innerHTML=''; products.forEach(p=>{ const li=document.createElement('li'); li.textContent=`${p.name} - ${p.desc} - R$${p.price}`; ul.appendChild(li); }); }
+function updateSaleProducts(){ const select=document.getElementById('saleProduct'); select.innerHTML=''; products.forEach(p=>{ const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; select.appendChild(opt); }); }
 
-document.getElementById('paymentMethod').addEventListener('change', function(){
-  document.getElementById('saleClientDiv').classList.toggle('hidden', this.value!=='fiado');
-});
+document.getElementById('paymentMethod').addEventListener('change', function(){ document.getElementById('saleClientDiv').classList.toggle('hidden', this.value!=='fiado'); });
+
 function addSale(){
   const productName=document.getElementById('saleProduct').value;
   const prod=products.find(p=>p.name===productName);
@@ -193,10 +186,7 @@ function addSale(){
   if(paymentMethod==='fiado'){
     const client=clients.find(c=>c.name===clientName);
     const fiadoTotal=sales.filter(s=>s.paymentMethod==='fiado'&&s.clientName===clientName).reduce((sum,s)=>sum+parseFloat(s.productPrice),0);
-    if((fiadoTotal+parseFloat(prod.price))>client.creditLimit){
-      alert(`Venda não permitida! Cliente ${clientName} ultrapassa o limite de crédito (${client.creditLimit}).`);
-      return;
-    }
+    if((fiadoTotal+parseFloat(prod.price))>client.creditLimit){ alert(`Venda não permitida! Cliente ${clientName} ultrapassa o limite de crédito (${client.creditLimit}).`); return; }
   }
 
   sales.push({productName:prod.name,productDesc:prod.desc,productPrice:prod.price,paymentMethod,clientName});
