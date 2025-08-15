@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nan Café</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; margin: 0; background: #f0f0f0; }
+    header { background: #6b4f4f; color: white; padding: 20px; text-align: center; }
+    header img { width: 160px; margin-bottom: 10px; }
+    nav { display: flex; justify-content: space-around; background: #8b6b6b; }
+    nav button { background: transparent; border: none; color: white; padding: 15px; cursor: pointer; font-size: 16px; font-weight: bold; }
+    nav button.active { border-bottom: 4px solid #fff; }
+    section { padding: 20px; display: none; }
+    section.active { display: block; }
+    input, button { padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+    button { background: #6b4f4f; color: white; border: none; cursor: pointer; transition: background 0.3s; }
+    button:hover { background: #8b6b6b; }
+    .product { background: #fff; padding: 15px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .barcode { font-family: monospace; font-size: 14px; color: #555; }
+    h2 { margin-top: 0; color: #333; }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="https://i.imgur.com/5ZqD8Pb.png" alt="Nan Café Logo">
+  <h1>Nan Café - App de Produtos</h1>
+</header>
+
+<nav>
+  <button class="tab-btn active" onclick="openTab('cadastro')">Cadastro</button>
+  <button class="tab-btn" onclick="openTab('lista')">Lista</button>
+  <button class="tab-btn" onclick="openTab('busca')">Busca</button>
+</nav>
+
+<section id="cadastro" class="active">
+  <h2>Cadastrar Produto</h2>
+  <input type="text" id="name" placeholder="Nome do Produto">
+  <input type="number" id="price" placeholder="Preço (R$)">
+  <input type="number" id="quantity" placeholder="Quantidade">
+  <input type="text" id="description" placeholder="Descrição">
+  <button onclick="addProduct()">Cadastrar Produto</button>
+</section>
+
+<section id="lista">
+  <h2>Lista de Produtos</h2>
+  <div id="productList"></div>
+</section>
+
+<section id="busca">
+  <h2>Buscar Produto pelo Código</h2>
+  <input type="text" id="searchCode" placeholder="Digite o código">
+  <button onclick="searchProduct()">Buscar</button>
+  <div id="searchResult"></div>
+</section>
+
+<script>
+  let products = [];
+
+  function generateBarcode(name) {
+    return 'NC' + Date.now();
+  }
+
+  function addProduct() {
+    const name = document.getElementById('name').value.trim();
+    const price = document.getElementById('price').value;
+    const quantity = document.getElementById('quantity').value;
+    const description = document.getElementById('description').value.trim();
+
+    if (!name || !price || !quantity) {
+      alert('Preencha todos os campos obrigatórios!');
+      return;
+    }
+
+    const barcode = generateBarcode(name);
+    const product = { name, price, quantity, description, barcode };
+    products.push(product);
+    displayProducts();
+    alert('Produto cadastrado com sucesso! Código: ' + barcode);
+
+    document.getElementById('name').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('quantity').value = '';
+    document.getElementById('description').value = '';
+  }
+
+  function displayProducts() {
+    const container = document.getElementById('productList');
+    container.innerHTML = '';
+    products.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'product';
+      div.innerHTML = `
+        <strong>${p.name}</strong><br>
+        Preço: R$ ${p.price}<br>
+        Quantidade: ${p.quantity}<br>
+        Descrição: ${p.description}<br>
+        <span class="barcode">Código: ${p.barcode}</span>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function searchProduct() {
+    const code = document.getElementById('searchCode').value.trim();
+    const resultDiv = document.getElementById('searchResult');
+    resultDiv.innerHTML = '';
+    const product = products.find(p => p.barcode === code);
+    if (product) {
+      resultDiv.innerHTML = `
+        <div class="product">
+          <strong>${product.name}</strong><br>
+          Preço: R$ ${product.price}<br>
+          Quantidade: ${product.quantity}<br>
+          Descrição: ${product.description}<br>
+          <span class="barcode">Código: ${product.barcode}</span>
+        </div>
+      `;
+    } else {
+      resultDiv.innerHTML = '<p>Nenhum produto encontrado com esse código.</p>';
+    }
+  }
+
+  function openTab(tabId) {
+    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
