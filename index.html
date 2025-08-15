@@ -1,134 +1,237 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nan Café</title>
-  <style>
-    body { font-family: 'Arial', sans-serif; margin: 0; background: #f0f0f0; }
-    header { background: #6b4f4f; color: white; padding: 20px; text-align: center; }
-    header img { width: 160px; margin-bottom: 10px; }
-    nav { display: flex; justify-content: space-around; background: #8b6b6b; }
-    nav button { background: transparent; border: none; color: white; padding: 15px; cursor: pointer; font-size: 16px; font-weight: bold; }
-    nav button.active { border-bottom: 4px solid #fff; }
-    section { padding: 20px; display: none; }
-    section.active { display: block; }
-    input, button { padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
-    button { background: #6b4f4f; color: white; border: none; cursor: pointer; transition: background 0.3s; }
-    button:hover { background: #8b6b6b; }
-    .product { background: #fff; padding: 15px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .barcode { font-family: monospace; font-size: 14px; color: #555; }
-    h2 { margin-top: 0; color: #333; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nan Café - Painel Completo</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; background: #e0f2e9; display: flex; }
+.sidebar { width: 200px; background: #2e7d32; color: white; height: 100vh; padding-top: 20px; position: fixed; }
+.sidebar a { display: block; color: white; padding: 15px; text-decoration: none; cursor: pointer; }
+.sidebar a:hover { background: #1b5e20; }
+main { margin-left: 200px; padding: 20px; width: 100%; }
+.hidden { display: none; }
+input, select, button { padding: 5px; margin: 5px 0; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+table, th, td { border: 1px solid #333; }
+th, td { padding: 5px; text-align: left; }
+</style>
 </head>
 <body>
 
-<header>
-  <img src="https://i.imgur.com/5ZqD8Pb.png" alt="Nan Café Logo">
-  <h1>Nan Café - App de Produtos</h1>
-</header>
+<div class="sidebar">
+  <a onclick="showSection('loginDiv')">Login</a>
+  <a onclick="showSection('userDiv')">Cadastro Usuário</a>
+  <a onclick="showSection('clientDivSection')">Cadastro Clientes</a>
+  <a onclick="showSection('productDiv')">Cadastro Produtos</a>
+  <a onclick="showSection('registerSaleDiv')">Registrar Venda</a>
+  <a onclick="showSection('salesTableDiv')">Vendas Registradas</a>
+  <a onclick="showSection('creditHistoryDiv')">Histórico Fiados</a>
+</div>
 
-<nav>
-  <button class="tab-btn active" onclick="openTab('cadastro')">Cadastro</button>
-  <button class="tab-btn" onclick="openTab('lista')">Lista</button>
-  <button class="tab-btn" onclick="openTab('busca')">Busca</button>
-</nav>
+<main>
+  <!-- LOGIN -->
+  <div id="loginDiv">
+    <h2>Login</h2>
+    <label>Usuário:</label>
+    <select id="loginUser">
+      <option value="Renan">Renan</option>
+      <option value="Ana Paula">Ana Paula</option>
+      <option value="Caio">Caio</option>
+      <option value="Administrador">Administrador</option>
+    </select><br>
+    <div id="loginPasswordDiv" class="hidden">
+      <label>Senha:</label>
+      <input type="password" id="loginPassword">
+    </div>
+    <button onclick="login()">Entrar</button>
+  </div>
 
-<section id="cadastro" class="active">
-  <h2>Cadastrar Produto</h2>
-  <input type="text" id="name" placeholder="Nome do Produto">
-  <input type="number" id="price" placeholder="Preço (R$)">
-  <input type="number" id="quantity" placeholder="Quantidade">
-  <input type="text" id="description" placeholder="Descrição">
-  <button onclick="addProduct()">Cadastrar Produto</button>
-</section>
+  <!-- Cadastro de Usuário -->
+  <div id="userDiv" class="hidden">
+    <h2>Cadastro de Usuário</h2>
+    <label>Nome:</label><input type="text" id="newUserName"><br>
+    <label>Senha:</label><input type="password" id="newUserPass"><br>
+    <button onclick="addUser()">Cadastrar Usuário</button>
+    <h3>Usuários Cadastrados</h3>
+    <ul id="userList"></ul>
+  </div>
 
-<section id="lista">
-  <h2>Lista de Produtos</h2>
-  <div id="productList"></div>
-</section>
+  <!-- Cadastro de Clientes -->
+  <div id="clientDivSection" class="hidden">
+    <h2>Cadastro de Clientes</h2>
+    <label>Nome:</label><input type="text" id="newClientName"><br>
+    <label>Telefone/Email:</label><input type="text" id="newClientContact"><br>
+    <label>Limite de Crédito:</label><input type="number" id="newClientCredit" placeholder="Ex: 500"><br>
+    <button onclick="addClient()">Cadastrar Cliente</button>
+    <h3>Clientes Cadastrados</h3>
+    <ul id="clientList"></ul>
+  </div>
 
-<section id="busca">
-  <h2>Buscar Produto pelo Código</h2>
-  <input type="text" id="searchCode" placeholder="Digite o código">
-  <button onclick="searchProduct()">Buscar</button>
-  <div id="searchResult"></div>
-</section>
+  <!-- Cadastro de Produtos -->
+  <div id="productDiv" class="hidden">
+    <h2>Cadastro de Produtos</h2>
+    <label>Nome:</label><input type="text" id="newProductName"><br>
+    <label>Descrição:</label><input type="text" id="newProductDesc"><br>
+    <label>Preço:</label><input type="number" id="newProductPrice"><br>
+    <button onclick="addProduct()">Cadastrar Produto</button>
+    <h3>Produtos Cadastrados</h3>
+    <ul id="productList"></ul>
+  </div>
+
+  <!-- Registrar Venda -->
+  <div id="registerSaleDiv" class="hidden">
+    <h2>Registrar Venda</h2>
+    <label>Produto:</label>
+    <select id="saleProduct"></select><br>
+    <label>Forma de Pagamento:</label>
+    <select id="paymentMethod">
+      <option value="a_vista">À vista</option>
+      <option value="cartao_credito">Cartão de Crédito</option>
+      <option value="cartao_debito">Cartão de Débito</option>
+      <option value="pix">Pix</option>
+      <option value="fiado">Fiado</option>
+    </select><br>
+    <div id="saleClientDiv" class="hidden">
+      <label>Cliente:</label>
+      <select id="saleClient"></select><br>
+    </div>
+    <button onclick="addSale()">Registrar Venda</button>
+  </div>
+
+  <!-- Vendas Registradas -->
+  <div id="salesTableDiv" class="hidden">
+    <h3>Vendas</h3>
+    <table id="salesTable">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Descrição</th>
+          <th>Valor</th>
+          <th>Pagamento</th>
+          <th>Cliente (fiado)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Histórico Fiados -->
+  <div id="creditHistoryDiv" class="hidden">
+    <h3>Histórico de Fiados</h3>
+    <div id="creditHistory"></div>
+  </div>
+</main>
 
 <script>
-  let products = [];
+let currentUser=''; let sales=[]; let users=['Renan','Ana Paula','Caio','Administrador'];
+let clients=[]; let products=[];
 
-  function generateBarcode(name) {
-    return 'NC' + Date.now();
-  }
+function showSection(id){
+  ['loginDiv','userDiv','clientDivSection','productDiv','registerSaleDiv','salesTableDiv','creditHistoryDiv'].forEach(divId=>{
+    document.getElementById(divId).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
 
-  function addProduct() {
-    const name = document.getElementById('name').value.trim();
-    const price = document.getElementById('price').value;
-    const quantity = document.getElementById('quantity').value;
-    const description = document.getElementById('description').value.trim();
+function login(){
+  const user=document.getElementById('loginUser').value;
+  const password=document.getElementById('loginPassword').value;
+  if((user==='Caio'||user==='Administrador')&&password!=='caio1506'){ alert('Senha incorreta!'); return; }
+  currentUser=user; alert('Login realizado!');
+}
 
-    if (!name || !price || !quantity) {
-      alert('Preencha todos os campos obrigatórios!');
+function addUser(){
+  const name=document.getElementById('newUserName').value;
+  const pass=document.getElementById('newUserPass').value;
+  if(name && pass){ users.push(name); updateUserList(); alert('Usuário cadastrado!'); }
+}
+function updateUserList(){
+  const ul=document.getElementById('userList'); ul.innerHTML='';
+  users.forEach(u=>{ const li=document.createElement('li'); li.textContent=u; ul.appendChild(li); });
+}
+
+function addClient(){
+  const name=document.getElementById('newClientName').value;
+  const contact=document.getElementById('newClientContact').value;
+  const creditLimit=parseFloat(document.getElementById('newClientCredit').value)||0;
+  if(name){ clients.push({name,contact,creditLimit}); updateClientList(); updateSaleClients(); alert('Cliente cadastrado com limite de crédito!'); }
+}
+function updateClientList(){
+  const ul=document.getElementById('clientList'); ul.innerHTML='';
+  clients.forEach(c=>{ const li=document.createElement('li'); li.textContent=`${c.name} (${c.contact}) - Limite: ${c.creditLimit}`; ul.appendChild(li); });
+}
+function updateSaleClients(){
+  const select=document.getElementById('saleClient'); select.innerHTML='';
+  clients.forEach(c=>{ const opt=document.createElement('option'); opt.value=c.name; opt.textContent=c.name; select.appendChild(opt); });
+}
+
+function addProduct(){
+  const name=document.getElementById('newProductName').value;
+  const desc=document.getElementById('newProductDesc').value;
+  const price=document.getElementById('newProductPrice').value;
+  if(name && price){ products.push({name,desc,price}); updateProductList(); updateSaleProducts(); alert('Produto cadastrado!'); }
+}
+function updateProductList(){
+  const ul=document.getElementById('productList'); ul.innerHTML='';
+  products.forEach(p=>{ const li=document.createElement('li'); li.textContent=`${p.name} - ${p.desc} - R$${p.price}`; ul.appendChild(li); });
+}
+function updateSaleProducts(){
+  const select=document.getElementById('saleProduct'); select.innerHTML='';
+  products.forEach(p=>{ const opt=document.createElement('option'); opt.value=p.name; opt.textContent=p.name; select.appendChild(opt); });
+}
+
+document.getElementById('paymentMethod').addEventListener('change', function(){
+  document.getElementById('saleClientDiv').classList.toggle('hidden', this.value!=='fiado');
+});
+function addSale(){
+  const productName=document.getElementById('saleProduct').value;
+  const prod=products.find(p=>p.name===productName);
+  const paymentMethod=document.getElementById('paymentMethod').value;
+  const clientName=paymentMethod==='fiado'?document.getElementById('saleClient').value:'';
+
+  if(paymentMethod==='fiado'){
+    const client=clients.find(c=>c.name===clientName);
+    const fiadoTotal=sales.filter(s=>s.paymentMethod==='fiado'&&s.clientName===clientName).reduce((sum,s)=>sum+parseFloat(s.productPrice),0);
+    if((fiadoTotal+parseFloat(prod.price))>client.creditLimit){
+      alert(`Venda não permitida! Cliente ${clientName} ultrapassa o limite de crédito (${client.creditLimit}).`);
       return;
     }
-
-    const barcode = generateBarcode(name);
-    const product = { name, price, quantity, description, barcode };
-    products.push(product);
-    displayProducts();
-    alert('Produto cadastrado com sucesso! Código: ' + barcode);
-
-    document.getElementById('name').value = '';
-    document.getElementById('price').value = '';
-    document.getElementById('quantity').value = '';
-    document.getElementById('description').value = '';
   }
 
-  function displayProducts() {
-    const container = document.getElementById('productList');
-    container.innerHTML = '';
-    products.forEach(p => {
-      const div = document.createElement('div');
-      div.className = 'product';
-      div.innerHTML = `
-        <strong>${p.name}</strong><br>
-        Preço: R$ ${p.price}<br>
-        Quantidade: ${p.quantity}<br>
-        Descrição: ${p.description}<br>
-        <span class="barcode">Código: ${p.barcode}</span>
-      `;
-      container.appendChild(div);
-    });
-  }
+  sales.push({productName:prod.name,productDesc:prod.desc,productPrice:prod.price,paymentMethod,clientName});
+  renderSales(); renderCreditHistory(); alert('Venda registrada!');
+}
 
-  function searchProduct() {
-    const code = document.getElementById('searchCode').value.trim();
-    const resultDiv = document.getElementById('searchResult');
-    resultDiv.innerHTML = '';
-    const product = products.find(p => p.barcode === code);
-    if (product) {
-      resultDiv.innerHTML = `
-        <div class="product">
-          <strong>${product.name}</strong><br>
-          Preço: R$ ${product.price}<br>
-          Quantidade: ${product.quantity}<br>
-          Descrição: ${product.description}<br>
-          <span class="barcode">Código: ${product.barcode}</span>
-        </div>
-      `;
-    } else {
-      resultDiv.innerHTML = '<p>Nenhum produto encontrado com esse código.</p>';
-    }
-  }
+function renderSales(){
+  const tbody=document.getElementById('salesTable').querySelector('tbody'); tbody.innerHTML='';
+  sales.forEach(s=>{
+    const row=document.createElement('tr');
+    let paymentText='';
+    switch(s.paymentMethod){case 'a_vista': paymentText='À vista';break;case 'cartao_credito': paymentText='Cartão de Crédito';break;case 'cartao_debito': paymentText='Cartão de Débito';break;case 'pix': paymentText='Pix';break;case 'fiado': paymentText='Fiado';break;}
+    row.innerHTML=`<td>${s.productName}</td><td>${s.productDesc}</td><td>${s.productPrice}</td><td>${paymentText}</td><td>${s.clientName}</td>`;
+    tbody.appendChild(row);
+  });
+}
 
-  function openTab(tabId) {
-    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-  }
+function renderCreditHistory(){
+  const creditDiv=document.getElementById('creditHistory'); creditDiv.innerHTML='';
+  const fiadoSales=sales.filter(s=>s.paymentMethod==='fiado');
+  const clientsWithFiado=[...new Set(fiadoSales.map(s=>s.clientName))];
+  clientsWithFiado.forEach(clientName=>{
+    const clientSales=fiadoSales.filter(s=>s.clientName===clientName);
+    const clientInfo=clients.find(c=>c.name===clientName);
+    let total=0;
+    const table=document.createElement('table');
+    table.innerHTML=`<thead><tr><th>Produto</th><th>Descrição</th><th>Valor</th></tr></thead>
+      <tbody>${clientSales.map(s=>{total+=parseFloat(s.productPrice); return `<tr><td>${s.productName}</td><td>${s.productDesc}</td><td>${s.productPrice}</td></tr>`}).join('')}
+      <tr><td colspan="2"><strong>Total Fiado</strong></td><td><strong>${total.toFixed(2)}</strong></td></tr>
+      <tr><td colspan="2"><strong>Limite Crédito</strong></td><td><strong>${clientInfo.creditLimit}</strong></td></tr>
+      </tbody>`;
+    const heading=document.createElement('h4'); heading.textContent=`Cliente: ${clientName}`;
+    creditDiv.appendChild(heading); creditDiv.appendChild(table);
+  });
+}
 </script>
-
 </body>
 </html>
